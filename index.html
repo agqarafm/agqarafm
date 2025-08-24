@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SuperSite — Vizual, Sürətli və Tam Funksional</title>
+  <meta name="description" content="GitHub Pages üçün mükəmməl, tam funksional, vizual animasiyalı və responsiv vebsayt şablonu." />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <meta property="og:title" content="SuperSite — GitHub üçün tam funksional sayt" />
+  <meta property="og:description" content="Portfel, blog, qalereya, kontakt formu, tünd/açıq mövzu və başqa funksiyalar." />
+  <meta property="og:image" content="assets/shot-1.svg" />
+  <meta name="theme-color" content="#0b1021" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#home"><img src="assets/logo.svg" alt="logo" /> <span>SuperSite</span></a>
+    <nav class="menu">
+      <a href="#features">Xüsusiyyətlər</a>
+      <a href="#projects">Layihələr</a>
+      <a href="#gallery">Qalereya</a>
+      <a href="#blog">Bloq</a>
+      <a href="#contact">Əlaqə</a>
+    </nav>
+    <div class="actions">
+      <button id="themeToggle" aria-label="Mövzu dəyiş">🌓</button>
+      <button id="menuToggle" class="only-mobile" aria-label="Menyu">☰</button>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <img class="hero-bg" src="assets/hero-bg.svg" alt="" />
+      <div class="hero-inner">
+        <h1>GitHub-da <span class="grad">tam funksional</span> sayt</h1>
+        <p class="lead">Müasir dizayn, şimşək sürətli yüklənmə, animasiyalar və real funksiyalar: qalereya, bloq, kontakt formu, tünd/açıq mövzu.</p>
+        <div class="cta">
+          <a class="btn primary" href="#features">Başlayaq</a>
+          <a class="btn ghost" href="https://github.com/new" target="_blank" rel="noopener">GitHub Repo aç</a>
+        </div>
+        <div class="stats">
+          <div><strong id="stat-speed">95+</strong><span>Performans</span></div>
+          <div><strong id="stat-components">25+</strong><span>Komponent</span></div>
+          <div><strong id="stat-ready">1 klik</strong><span>Yayımla</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <h2>Xüsusiyyətlər</h2>
+      <div class="grid three">
+        <article class="card">
+          <h3>Responsiv & Animasiya</h3>
+          <p>Mobil, planşet və masaüstü üçün ideal görünüş. Yüngül CSS animasiyaları.</p>
+        </article>
+        <article class="card">
+          <h3>Tünd/Açıq Mövzu</h3>
+          <p>Bir kliklə mövzu dəyişikliyi. Seçim yadda saxlanılır.</p>
+        </article>
+        <article class="card">
+          <h3>Bloq & Qalereya</h3>
+          <p>JSON-dan bloq postları, açılan şəklilərə malik qalereya (lightbox).</p>
+        </article>
+        <article class="card">
+          <h3>SEO & Paylaşım</h3>
+          <p>Meta teqlər, açıq qraf, favicon, sosial görüntü.</p>
+        </article>
+        <article class="card">
+          <h3>Form İnteqrasiyası</h3>
+          <p>Formspree və ya GitHub Issues ilə kontakt toplama.</p>
+        </article>
+        <article class="card">
+          <h3>GitHub Pages Hazır</h3>
+          <p><code>.nojekyll</code> faylı və sadə yayımlama addımları.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="projects" class="section alt">
+      <h2>Seçilmiş Layihələr</h2>
+      <div class="grid three">
+        <article class="project">
+          <img src="assets/shot-1.svg" alt="Layihə 1" />
+          <div class="p-body">
+            <h3>UI Kit</h3>
+            <p>Modul kartlar, düymələr, badge-lər və toast sistemi.</p>
+            <button class="btn small" data-toast="UI Kit haqqında məlumat göndərildi">Məlumat al</button>
+          </div>
+        </article>
+        <article class="project">
+          <img src="assets/shot-2.svg" alt="Layihə 2" />
+          <div class="p-body">
+            <h3>Qalereya</h3>
+            <p>Klavişlə idarə olunan lightbox, swipe dəstəyi.</p>
+            <button class="btn small" data-toast="Qalereya haqqında məlumat göndərildi">Məlumat al</button>
+          </div>
+        </article>
+        <article class="project">
+          <img src="assets/shot-3.svg" alt="Layihə 3" />
+          <div class="p-body">
+            <h3>Bloq</h3>
+            <p>JSON-dan dinamik render, sürətli axtarış.</p>
+            <button class="btn small" data-toast="Bloq haqqında məlumat göndərildi">Məlumat al</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="gallery" class="section">
+      <h2>Qalereya</h2>
+      <div class="grid four gallery">
+        <a href="assets/shot-1.svg"><img src="assets/shot-1.svg" alt="Şəkil 1" /></a>
+        <a href="assets/shot-2.svg"><img src="assets/shot-2.svg" alt="Şəkil 2" /></a>
+        <a href="assets/shot-3.svg"><img src="assets/shot-3.svg" alt="Şəkil 3" /></a>
+        <a href="assets/shot-4.svg"><img src="assets/shot-4.svg" alt="Şəkil 4" /></a>
+        <a href="assets/shot-5.svg"><img src="assets/shot-5.svg" alt="Şəkil 5" /></a>
+        <a href="assets/shot-6.svg"><img src="assets/shot-6.svg" alt="Şəkil 6" /></a>
+      </div>
+    </section>
+
+    <section id="blog" class="section alt">
+      <h2>Bloq</h2>
+      <div class="blog-controls">
+        <input id="blogSearch" placeholder="Axtarış..." />
+      </div>
+      <div id="blogList" class="grid two"></div>
+      <template id="blogItemTpl">
+        <article class="card blog-item">
+          <h3 class="b-title"></h3>
+          <time class="b-date"></time>
+          <p class="b-excerpt"></p>
+          <button class="btn small read-more">Oxu</button>
+        </article>
+      </template>
+    </section>
+
+    <section id="contact" class="section">
+      <h2>Əlaqə</h2>
+      <div class="grid two">
+        <form id="contactForm" class="card" action="https://formspree.io/f/your-id" method="POST">
+          <label>Ad Soyad
+            <input required type="text" name="name" />
+          </label>
+          <label>E-poçt
+            <input required type="email" name="email" />
+          </label>
+          <label>Mesaj
+            <textarea required name="message" rows="5"></textarea>
+          </label>
+          <button class="btn primary" type="submit">Göndər</button>
+          <p class="form-hint">Backend istəmirsinizsə, <a href="https://formspree.io/" target="_blank" rel="noopener">Formspree</a> ID-nizi yazın.</p>
+        </form>
+        <div class="card">
+          <h3>Alternativ</h3>
+          <p>GitHub Issues vasitəsi ilə mesaj:</p>
+          <a class="btn ghost" id="issueBtn" target="_blank" rel="noopener">Issue aç</a>
+          <div class="divider"></div>
+          <h3>Əlaqə məlumatları</h3>
+          <ul class="list">
+            <li>📍 Bakı, Azərbaycan</li>
+            <li>✉️ info@example.com</li>
+            <li>🔗 github.com/istifadeci</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© <span id="year"></span> SuperSite — GitHub Pages</p>
+    <div class="socials">
+      <a href="#" aria-label="X">𝕏</a>
+      <a href="#" aria-label="YouTube">▶︎</a>
+      <a href="#" aria-label="Instagram">◎</a>
+    </div>
+  </footer>
+
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <button class="close" aria-label="Bağla">×</button>
+    <img alt="Böyük şəkil" />
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
