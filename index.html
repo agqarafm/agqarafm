@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>İş Saatları və Qeydlər</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #f0f0f5, #dfe9f3);
+      overflow: hidden;
+    }
+    .hidden { display: none; }
+
+    /* Login */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+    }
+    #login-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    #login-box input {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+    }
+    #login-box button {
+      margin-top: 1rem;
+      padding: 0.5rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #007aff;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* Layout */
+    #app {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      height: 100vh;
+    }
+    header {
+      grid-column: 1 / 4;
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(6px);
+      font-weight: bold;
+    }
+
+    /* Qeydlər */
+    #notes {
+      padding: 1rem;
+      overflow-y: auto;
+      border-right: 1px solid #ddd;
+    }
+    #notes input, #notes textarea {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+    }
+    #notes button {
+      padding: 0.5rem;
+      width: 100%;
+      border: none;
+      border-radius: 0.5rem;
+      background: #34c759;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .note {
+      background: white;
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      position: relative;
+    }
+    .note small {
+      color: gray;
+    }
+    .note .actions {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+    }
+    .note .actions button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* İş saatları */
+    #work-hours {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #hours-list {
+      list-style: none;
+      padding: 0;
+    }
+    #hours-list li {
+      padding: 0.5rem 1rem;
+      margin: 0.3rem 0;
+      border-radius: 0.5rem;
+      background: rgba(255,255,255,0.8);
+    }
+    #hours-list li.today {
+      background: #007aff;
+      color: white;
+      font-weight: bold;
+    }
+    #hours-list li.rest {
+      background: #ff3b30;
+      color: white;
+    }
+    #edit-btn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #007aff;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Təqvim */
+    #calendar {
+      padding: 1rem;
+      overflow-y: auto;
+      border-left: 1px solid #ddd;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      text-align: center;
+    }
+    th, td {
+      padding: 0.5rem;
+    }
+    td.today {
+      background: #007aff;
+      color: white;
+      border-radius: 50%;
+    }
+    td.has-note::after {
+      content: "•";
+      color: #34c759;
+      display: block;
+      font-size: 1.2rem;
+      margin-top: -0.5rem;
+    }
+
+    /* Modal */
+    #modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+    #modal-content {
+      background: white;
+      padding: 1rem;
+      border-radius: 1rem;
+      max-width: 400px;
+      width: 90%;
+    }
+    #modal-content input {
+      width: 100%;
+      margin: 0.3rem 0;
+      padding: 0.5rem;
+    }
+    #modal-content button {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #007aff;
+      color: white;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="login-screen">
+  <div id="login-box">
+    <h2>Şifrə daxil et</h2>
+    <input type="password" id="password" placeholder="Şifrə">
+    <br>
+    <button onclick="checkPassword()">Daxil ol</button>
+    <p id="error" style="color:red;display:none;">Yanlış şifrə!</p>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" class="hidden">
+  <header>
+    <div id="datetime"></div>
+  </header>
+
+  <!-- Notes -->
+  <div id="notes">
+    <h3>Qeydlər</h3>
+    <input type="text" id="note-title" placeholder="Başlıq">
+    <textarea id="note-text" placeholder="Qeyd"></textarea>
+    <button onclick="addNote()">Qeyd et</button>
+    <div id="notes-list"></div>
+  </div>
+
+  <!-- Work hours -->
+  <div id="work-hours">
+    <h3>İş saatları</h3>
+    <ul id="hours-list"></ul>
+    <button id="edit-btn" onclick="openModal()">⚙️ Tənzimlə</button>
+  </div>
+
+  <!-- Calendar -->
+  <div id="calendar">
+    <h3>Təqvim</h3>
+    <div id="calendar-grid"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modal-content">
+    <h3>Saatları tənzimlə</h3>
+    <div id="modal-body"></div>
+    <button onclick="saveHours()">Yadda saxla</button>
+  </div>
+</div>
+
+<script>
+  // Login
+  function checkPassword() {
+    let pw = document.getElementById('password').value;
+    if(pw === "223366") {
+      document.getElementById('login-screen').style.display = "none";
+      document.getElementById('app').classList.remove('hidden');
+    } else {
+      document.getElementById('error').style.display = "block";
+    }
+  }
+
+  // Date & time
+  function updateDateTime() {
+    let now = new Date();
+    let opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'};
+    document.getElementById('datetime').textContent = now.toLocaleDateString('az-AZ', opts);
+  }
+  setInterval(updateDateTime,1000); updateDateTime();
+
+  // Work hours
+  let hours = JSON.parse(localStorage.getItem("workHours")) || {
+    1:"09:00 - 18:00",
+    2:"09:00 - 18:00",
+    3:"09:00 - 18:00",
+    4:"09:00 - 18:00",
+    5:"İstirahət günü",
+    6:"10:00 - 15:00",
+    0:"10:00 - 15:00"
+  };
+  function renderHours(){
+    let ul = document.getElementById('hours-list');
+    ul.innerHTML="";
+    let today = new Date().getDay();
+    for(let d=1; d<=7; d++){
+      let wd = (d===7?0:d);
+      let li=document.createElement("li");
+      li.textContent = weekdayName(wd)+": "+hours[wd];
+      if(wd===today) li.classList.add("today");
+      if(wd===5) li.classList.add("rest");
+      ul.appendChild(li);
+    }
+  }
+  function weekdayName(d){
+    return ["Bazar","Bazar ertəsi","Çərşənbə axşamı","Çərşənbə","Cümə axşamı","Cümə","Şənbə"][d];
+  }
+  renderHours();
+
+  function openModal(){
+    document.getElementById("modal").style.display="flex";
+    let body=document.getElementById("modal-body");
+    body.innerHTML="";
+    for(let d=1; d<=7; d++){
+      let wd=(d===7?0:d);
+      let inp=document.createElement("input");
+      inp.value=hours[wd];
+      inp.dataset.day=wd;
+      body.appendChild(document.createTextNode(weekdayName(wd)+": "));
+      body.appendChild(inp);
+      body.appendChild(document.createElement("br"));
+    }
+  }
+  function saveHours(){
+    let inputs=document.querySelectorAll("#modal-body input");
+    inputs.forEach(inp=>{hours[inp.dataset.day]=inp.value;});
+    localStorage.setItem("workHours",JSON.stringify(hours));
+    renderHours();
+    document.getElementById("modal").style.display="none";
+  }
+
+  // Notes
+  function addNote(){
+    let t=document.getElementById("note-title").value;
+    let txt=document.getElementById("note-text").value;
+    if(!txt) return;
+    let notes=JSON.parse(localStorage.getItem("notes"))||[];
+    notes.push({title:t,text:txt,time:new Date().toLocaleString("az-AZ")});
+    localStorage.setItem("notes",JSON.stringify(notes));
+    renderNotes();
+  }
+  function renderNotes(){
+    let notes=JSON.parse(localStorage.getItem("notes"))||[];
+    let list=document.getElementById("notes-list");
+    list.innerHTML="";
+    notes.forEach((n,i)=>{
+      let div=document.createElement("div");
+      div.className="note";
+      div.innerHTML="<b>"+n.title+"</b><p>"+n.text+"</p><small>"+n.time+"</small>";
+      let actions=document.createElement("div");
+      actions.className="actions";
+      let del=document.createElement("button");
+      del.textContent="❌";
+      del.onclick=()=>{notes.splice(i,1);localStorage.setItem("notes",JSON.stringify(notes));renderNotes();};
+      actions.appendChild(del);
+      div.appendChild(actions);
+      list.appendChild(div);
+    });
+  }
+  renderNotes();
+
+  // Calendar
+  function renderCalendar(){
+    let now=new Date();
+    let y=now.getFullYear(), m=now.getMonth();
+    let first=new Date(y,m,1).getDay();
+    let days=new Date(y,m+1,0).getDate();
+    let grid="<table><tr>";
+    let wd=["B.e","Ç.a","Çər","C.a","Cüm","Şnb","Baz"];
+    wd.forEach(w=>grid+="<th>"+w+"</th>");
+    grid+="</tr><tr>";
+    for(let i=1;i<first;i++){grid+="<td></td>";}
+    for(let d=1;d<=days;d++){
+      let date=new Date(y,m,d);
+      let cls="";
+      if(date.toDateString()===now.toDateString()) cls="today";
+      grid+="<td class='"+cls+"'>"+d+"</td>";
+      if((first+d-1)%7===0) grid+="</tr><tr>";
+    }
+    grid+="</tr></table>";
+    document.getElementById("calendar-grid").innerHTML=grid;
+  }
+  renderCalendar();
+</script>
+
+</body>
+</html>
