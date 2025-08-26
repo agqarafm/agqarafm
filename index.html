@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>Kart Məbləğləri Hesablayıcı</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #333; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
+    th { background: #4CAF50; color: white; }
+    tr:hover { background: #f1f1f1; transition: 0.3s; }
+    input[type="number"], input[type="text"] { padding: 6px; border: 1px solid #ccc; border-radius: 6px; }
+    button { padding: 6px 12px; margin: 3px; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+    button:hover { opacity: 0.8; }
+    .add-btn { background: #4CAF50; color: white; }
+    .reset-btn { background: #e74c3c; color: white; }
+    .note-area { width: 100%; height: 80px; margin-top: 10px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+    .notes-container { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kart Məbləğləri Hesablayıcı</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Ad</th>
+          <th>Məbləğ (₼)</th>
+          <th>Əməliyyat</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div style="margin-top:20px;">
+      <strong>Cəm: </strong><span id="total">0</span> ₼
+    </div>
+    <button class="reset-btn" onclick="resetDay()">Günü Sıfırla</button>
+
+    <div class="notes-container">
+      <h3>Qeydlər</h3>
+      <textarea id="notes" class="note-area" placeholder="Qeyd əlavə et..."></textarea>
+    </div>
+  </div>
+
+  <script>
+    const names = ["Gülşad", "Aidə", "Arzu"];
+    const tableBody = document.getElementById("table-body");
+    const totalEl = document.getElementById("total");
+    const notesEl = document.getElementById("notes");
+    const todayKey = new Date().toISOString().slice(0, 10);
+
+    let data = JSON.parse(localStorage.getItem(todayKey)) || { entries: [], notes: "" };
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+      let total = 0;
+      data.entries.forEach((entry, index) => {
+        total += entry.amount;
+        let row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${entry.name}</td>
+          <td>${entry.amount}</td>
+          <td>
+            <button onclick="editEntry(${index})">Düzəliş</button>
+            <button onclick="deleteEntry(${index})">Sil</button>
+          </td>`;
+        tableBody.appendChild(row);
+      });
+      totalEl.textContent = total;
+      notesEl.value = data.notes;
+      localStorage.setItem(todayKey, JSON.stringify(data));
+    }
+
+    function addEntry(name, amount) {
+      if (!amount || amount <= 0) return;
+      data.entries.push({ name, amount: Number(amount) });
+      renderTable();
+    }
+
+    function editEntry(index) {
+      const newAmount = prompt("Yeni məbləği daxil edin:", data.entries[index].amount);
+      if (newAmount !== null && !isNaN(newAmount) && newAmount > 0) {
+        data.entries[index].amount = Number(newAmount);
+        renderTable();
+      }
+    }
+
+    function deleteEntry(index) {
+      if (confirm("Silmək istədiyinizə əminsiniz?")) {
+        data.entries.splice(index, 1);
+        renderTable();
+      }
+    }
+
+    function resetDay() {
+      if (confirm("Bu günü sıfırlamaq istədiyinizə əminsiniz?")) {
+        data = { entries: [], notes: "" };
+        renderTable();
+      }
+    }
+
+    notesEl.addEventListener("input", () => {
+      data.notes = notesEl.value;
+      localStorage.setItem(todayKey, JSON.stringify(data));
+    });
+
+    // İlk render
+    names.forEach(name => {
+      let amount = prompt(name + " üçün məbləğ daxil edin (boş buraxmaq olar):");
+      if (amount && !isNaN(amount)) {
+        addEntry(name, Number(amount));
+      }
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>
