@@ -1,428 +1,392 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="az">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kart Məbləğləri Hesablayıcı — Server & Lokal rejim</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Günlük Hesablama — Gülşad, Aidə, Arzu</title>
   <style>
-    :root{ --bg:#0b1020; --panel:#111834; --muted:#6b7fb8; --text:#eaf1ff; --accent:#7c3aed; --accent-2:#22d3ee; --ok:#10b981; --warn:#f59e0b; --danger:#ef4444; --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);} 
-    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:radial-gradient(1200px 800px at 80% -10%, rgba(124,58,237,.15), transparent),radial-gradient(900px 600px at -20% 110%, rgba(34,211,238,.12), transparent),var(--bg);color:var(--text);} 
-    .container{max-width:1200px;margin:0 auto;padding:28px} .glass{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:var(--shadow);backdrop-filter: blur(6px)} header.glass{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:16px 18px;margin-bottom:18px;position:sticky;top:0;z-index:5} .title{font-weight:800;letter-spacing:.4px} .title small{display:block;font-weight:500;color:var(--muted)} .datebar{display:flex;align-items:center;gap:10px} .btn{border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;color:white;transition:transform .18s ease, background .18s ease, box-shadow .18s ease} .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0)} .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)} .btn-accent{background:linear-gradient(135deg, var(--accent), #5b21b6)} .btn-outline{background:transparent;border:1px solid rgba(255,255,255,.15)} .btn-danger{background:linear-gradient(135deg, var(--danger), #b91c1c)} .date-chip{padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.16);font-weight:700}
+    :root{--bg:#0f1724;--card:#111827;--accent:#06b6d4;--muted:#94a3b8;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#e6eef6;background:linear-gradient(180deg,#071028 0%, #081226 60%);}
+    .app{max-width:1000px;margin:28px auto;padding:22px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:20px;margin:0;color:#fff}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
 
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px} .col-8{grid-column:span 8} .col-4{grid-column:span 4} @media (max-width: 980px){.col-8,.col-4{grid-column:span 12}}
+    /* layout */
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
 
-    /* Person Cards */ .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px} @media (max-width:980px){.cards{grid-template-columns:1fr}} .card{position:relative;overflow:hidden;padding:18px} .card::after{content:"";position:absolute;inset:0;background:radial-gradient(600px 120px at 0% 0%, rgba(124,58,237,.18), transparent),radial-gradient(600px 120px at 100% 100%, rgba(34,211,238,.18), transparent);opacity:.65;pointer-events:none} .card h3{margin:0 0 12px 0;font-size:20px} .total{font-weight:800;font-size:26px;margin-top:4px} .muted{color:var(--muted);font-size:13px}
+    /* form */
+    .people{display:flex;gap:10px;flex-direction:column}
+    .row{display:flex;gap:10px;align-items:center}
+    label{font-size:13px;color:var(--muted);min-width:80px}
+    input[type="number"], textarea{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:#fff;outline:none}
+    input[type="number"]::-webkit-inner-spin-button{opacity:0.6}
+    .name{min-width:120px;font-weight:600}
 
-    .row{display:flex;gap:10px;margin-top:12px} input[type="number"], input[type="text"], textarea{width:100%;padding:12px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text);outline:none;font-size:14px;transition: box-shadow .18s ease, border .18s ease, transform .18s ease;} input:focus, textarea:focus{box-shadow:0 0 0 3px rgba(124,58,237,.35);border-color: rgba(124,58,237,.6)} .add-btn{white-space:nowrap}
+    .totals{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px;border-radius:10px;background:linear-gradient(90deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03)}
+    .total-label{font-size:13px;color:var(--muted)}
+    .total-value{font-size:20px;font-weight:700;color:var(--accent)}
 
-    /* Table */ table{width:100%;border-collapse:separate;border-spacing:0 10px} thead th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 12px} tbody td{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);padding:12px;vertical-align:middle} tbody tr{transition:transform .18s ease} tbody tr:hover{transform:scale(1.01)} tbody td:first-child{border-top-left-radius:12px;border-bottom-left-radius:12px} tbody td:last-child{border-top-right-radius:12px;border-bottom-right-radius:12px}
+    .actions{display:flex;gap:8px;margin-top:12px}
+    button{cursor:pointer;padding:10px 12px;border-radius:10px;border: none;background:linear-gradient(180deg,#0ea5a8,#0891b2);color:#022; font-weight:700}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.05);color:var(--muted);font-weight:600}
+    button.danger{background:linear-gradient(180deg,#fb7185,#f43f5e);color:#fff}
 
-    .chip{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06)}
+    /* records */
+    .records-list{max-height:540px;overflow:auto;padding-right:6px}
+    .record{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;margin-bottom:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02);transition:transform .22s ease, box-shadow .22s}
+    .record:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(2,6,23,0.6)}
+    .rec-left{display:flex;gap:10px;align-items:center}
+    .badge{font-size:12px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);color:var(--muted)}
+    .rec-meta{font-size:13px;color:var(--muted)}
+    .rec-amount{font-weight:700}
+    .rec-actions{display:flex;gap:8px}
+    .icon-btn{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);cursor:pointer}
 
-    /* Notes */ .notes{padding:16px} .notes h3{margin:0 0 10px 0} .save-ind{font-size:12px;color:var(--muted)}
+    /* empty */
+    .empty{padding:36px;text-align:center;color:var(--muted)}
 
-    /* Footer total */ .grand{display:flex;align-items:center;justify-content:space-between;padding:14px 16px} .grand .sum{font-size:28px;font-weight:900}
+    /* small screens */
+    @media(max-width:920px){.grid{grid-template-columns:1fr;}.app{padding:12px}}
 
-    /* Toast */ .toast{position:fixed;right:18px;bottom:18px;background:linear-gradient(135deg, #0ea5e9, #7c3aed);color:#fff;padding:12px 14px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);transition:all .25s ease;z-index:20} .toast.show{opacity:1;transform:translateY(0)}
+    /* subtle animations */
+    .pulse{animation:pulse 2s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(6,182,212,0.14)}70%{box-shadow:0 0 0 14px rgba(6,182,212,0)}100%{box-shadow:0 0 0 0 rgba(6,182,212,0)}}
 
-    /* Tiny animations */ @keyframes pop {0%{transform:scale(.94)} 60%{transform:scale(1.02)} 100%{transform:scale(1)}} .pop{animation:pop .35s ease}
+    /* form focus */
+    input:focus, textarea:focus{border-color:rgba(6,182,212,0.9);box-shadow:0 6px 20px rgba(6,182,212,0.06)}
+
+    /* nice scrollbar */
+    .records-list::-webkit-scrollbar{width:8px}
+    .records-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.03);border-radius:10px}
+
   </style>
 </head>
 <body>
-  <div class="container">
-    <header class="glass">
+  <div class="app">
+    <header>
       <div>
-        <div class="title">Kart Məbləğləri Hesablayıcı <small>Server & Lokal rejim — Gülşad • Aidə • Arzu</small></div>
+        <h1>Günlük Hesablama</h1>
+        <p class="lead">Gülşad, Aidə, Arzu üçün kart məbləğlərini daxil edin — cəmi avtomatik hesablanır. Qeydlər gündəlik saxlanır, düzəliş və silmək mümkündür.</p>
       </div>
-      <div class="datebar">
-        <button class="btn btn-ghost" id="prevDay" title="Dünən">⟵</button>
-        <div class="date-chip" id="dateLabel">—</div>
-        <button class="btn btn-ghost" id="nextDay" title="Sabah">⟶</button>
-        <input class="btn btn-outline" type="date" id="datePicker" />
-        <button class="btn btn-accent" id="todayBtn">Bu gün</button>
-        <button class="btn btn-outline" id="exportBtn" title="JSON ixrac">Ixrac</button>
-        <button class="btn btn-danger" id="resetDayBtn" title="Günü sıfırla">Günü Sıfırla</button>
+      <div style="text-align:right;color:var(--muted);font-size:13px">
+        <div id="todayDisplay">Tarix: --</div>
+        <div id="clock" style="font-weight:600"></div>
       </div>
     </header>
 
-    <div class="grid">
-      <div class="col-8">
-        <section class="glass" style="padding:16px">
-          <div class="cards">
-            <div class="card glass" data-person="Gülşad">
-              <h3>Gülşad <span class="muted">— Cəm:</span> <span class="total" id="total-Gülşad">0 ₼</span></h3>
-              <div class="muted">Kart məbləğini daxil edib əlavə edin.</div>
-              <div class="row">
-                <input type="number" inputmode="decimal" step="0.01" placeholder="Məbləğ (₼)" class="amount" />
-                <input type="text" placeholder="Qeyd (ixtiyari)" class="note" />
-                <button class="btn add-btn btn-accent addEntry">Əlavə et</button>
+    <main class="grid">
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div>
+            <strong style="font-size:15px">Yeni Qeyd</strong>
+            <div style="font-size:13px;color:var(--muted)">Bu gün üçün məbləğləri daxil edin və "Saxla" düyməsinə basın.</div>
+          </div>
+          <div class="badge">Statik sayt — yerli yaddaş (browser)</div>
+        </div>
+
+        <form id="entryForm" style="margin-top:14px">
+          <div class="people">
+            <div class="row">
+              <div class="name">Gülşad</div>
+              <label for="gulshad">AZN</label>
+              <input id="gulshad" type="number" step="0.01" min="0" placeholder="0.00" />
+            </div>
+
+            <div class="row">
+              <div class="name">Aidə</div>
+              <label for="aide">AZN</label>
+              <input id="aide" type="number" step="0.01" min="0" placeholder="0.00" />
+            </div>
+
+            <div class="row">
+              <div class="name">Arzu</div>
+              <label for="arzu">AZN</label>
+              <input id="arzu" type="number" step="0.01" min="0" placeholder="0.00" />
+            </div>
+
+            <div style="margin-top:8px">
+              <label style="display:block;margin-bottom:6px;color:var(--muted)">Qeyd</label>
+              <textarea id="note" rows="3" placeholder="Qısa qeyd..." style="resize:vertical"></textarea>
+            </div>
+
+            <div class="totals">
+              <div>
+                <div class="total-label">Cəm</div>
+                <div class="total-value" id="totalValue">0.00 AZN</div>
+              </div>
+              <div style="text-align:right;color:var(--muted);font-size:13px">
+                <div id="previewBreakdown">Gülşad 0.00 • Aidə 0.00 • Arzu 0.00</div>
+                <div style="font-size:12px;margin-top:6px">Həmişə avtomatik olaraq yenilənir</div>
               </div>
             </div>
-            <div class="card glass" data-person="Aidə">
-              <h3>Aidə <span class="muted">— Cəm:</span> <span class="total" id="total-Aidə">0 ₼</span></h3>
-              <div class="muted">Kart məbləğini daxil edib əlavə edin.</div>
-              <div class="row">
-                <input type="number" inputmode="decimal" step="0.01" placeholder="Məbləğ (₼)" class="amount" />
-                <input type="text" placeholder="Qeyd (ixtiyari)" class="note" />
-                <button class="btn add-btn btn-accent addEntry">Əlavə et</button>
-              </div>
-            </div>
-            <div class="card glass" data-person="Arzu">
-              <h3>Arzu <span class="muted">— Cəm:</span> <span class="total" id="total-Arzu">0 ₼</span></h3>
-              <div class="muted">Kart məbləğini daxil edib əlavə edin.</div>
-              <div class="row">
-                <input type="number" inputmode="decimal" step="0.01" placeholder="Məbləğ (₼)" class="amount" />
-                <input type="text" placeholder="Qeyd (ixtiyari)" class="note" />
-                <button class="btn add-btn btn-accent addEntry">Əlavə et</button>
-              </div>
+
+            <div class="actions">
+              <button type="button" id="saveBtn">Saxla</button>
+              <button type="button" class="ghost" id="clearBtn">Sıfırla Sahələr</button>
+              <button type="button" class="ghost" id="newDayBtn">Yeni Günə Keç</button>
             </div>
           </div>
+        </form>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 4px 8px 4px">
-            <div class="muted">Günün əməliyyatları</div>
-            <div class="chip" id="opsCount">0 əməliyyat</div>
+      </section>
+
+      <aside class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <strong>Qeydlər (gündəlik arxiv)</strong>
+            <div style="font-size:13px;color:var(--muted)">Tarix üzrə saxlanmış qeydləri redaktə və silə bilərsiniz.</div>
           </div>
-
-          <div class="glass" style="padding:8px">
-            <table>
-              <thead>
-                <tr>
-                  <th>Şəxs</th>
-                  <th>Məbləğ</th>
-                  <th>Qeyd</th>
-                  <th>Vaxt</th>
-                  <th style="text-align:right">Əməliyyatlar</th>
-                </tr>
-              </thead>
-              <tbody id="rows"></tbody>
-            </table>
+          <div style="display:flex;gap:8px">
+            <button class="ghost" id="exportBtn">Export JSON</button>
+            <button class="ghost" id="importBtn">Import</button>
+            <button class="danger" id="clearAllBtn">Hamısını Sil</button>
           </div>
+        </div>
 
-          <div class="grand glass" style="margin-top:12px">
-            <div class="muted">Ümumi cəm</div>
-            <div class="sum" id="grandTotal">0 ₼</div>
-          </div>
-        </section>
-      </div>
+        <div class="records-list" id="recordsList">
+          <div class="empty">Qeyd tapılmadı — ilk qeydi yaradın.</div>
+        </div>
 
-      <aside class="col-4">
-        <section class="glass notes">
-          <h3>Gündəlik Qeydlər</h3>
-          <div class="save-ind" id="saveInd">—</div>
-          <textarea id="dailyNotes" rows="12" placeholder="Bu gün üçün qeydlərinizi yazın..."></textarea>
-        </section>
-
-        <section class="glass" style="padding:16px; margin-top:18px">
-          <h3>Tez əmrlər</h3>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
-            <button class="btn btn-ghost" data-quick="Terminaldan ödəniş">Terminal</button>
-            <button class="btn btn-ghost" data-quick="Nağd kart yükləmə">Nağd→Kart</button>
-            <button class="btn btn-ghost" data-quick="Onlayn alış">Onlayn</button>
-            <button class="btn btn-ghost" data-quick="Bonus köçürüldü">Bonus</button>
-          </div>
-          <p class="muted" style="margin-top:10px">Qısa qeydləri klikləyərək qeyd xanalarına əlavə edin.</p>
-        </section>
       </aside>
-    </div>
+    </main>
   </div>
 
-  <div class="toast" id="toast">Saxlanıldı</div>
-
-  <!--
-    SERVER: Aşağıda verilən "server.js" faylı Node.js (Express) server nümunəsidir.
-    1) Fayllar:
-       - public/index.html   (bu HTML faylı - yuxarıdakı məzmun)
-       - server.js           (aşağıdakı kod)
-       - data.json           (başlanğıc üçün: {} )
-    2) Quraşdırma:
-       npm init -y
-       npm i express cors
-       node server.js
-    3) Server http://localhost:3000 ünvanında işləyəcək və API endpointləri təmin edəcək.
-  -->
+  <template id="recordTemplate">
+    <div class="record" data-id="">
+      <div class="rec-left">
+        <div class="badge rec-date">01.01.1970</div>
+        <div>
+          <div class="rec-meta rec-note">Qeyd məzmunu...</div>
+          <div class="rec-meta">Gülşad: <span class="rec-amount rec-gul">0.00</span> • Aidə: <span class="rec-amount rec-aid">0.00</span> • Arzu: <span class="rec-amount rec-arz">0.00</span></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="text-align:right;margin-right:8px">
+          <div style="font-size:12px;color:var(--muted)">Cəm</div>
+          <div class="rec-total rec-amount">0.00</div>
+        </div>
+        <div class="rec-actions">
+          <button class="icon-btn editBtn">Düzəliş</button>
+          <button class="icon-btn delBtn">Sil</button>
+        </div>
+      </div>
+    </div>
+  </template>
 
   <script>
-  // =================== FRONTEND (browser) ===================
-  (function(){
-    const $ = (sel, el=document) => el.querySelector(sel);
-    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
-    const formatAZN = (n)=> (Number(n)||0).toLocaleString('az-AZ',{style:'currency',currency:'AZN',maximumFractionDigits:2});
-    const ymd = (d)=> d.toISOString().slice(0,10);
-    const fromYMD = (s)=> { const [y,m,day]=s.split('-').map(Number); return new Date(y, m-1, day); };
-    const now = ()=> new Date();
-    const STORAGE_KEY = 'kart-app-v2';
-    const API_BASE = '/api'; // server base
+    // --- Utilities ---
+    const LS_KEY = 'hesablama_records_v1';
 
-    const monthsAZ = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avqust','sentyabr','oktyabr','noyabr','dekabr'];
-    const formatDateLabel = (d)=> `${String(d.getDate()).padStart(2,'0')} ${monthsAZ[d.getMonth()]} ${d.getFullYear()}`;
-
-    // state contains current date and local cache
-    const state = { date: ymd(now()), data: {} };
-
-    // LOCAL storage helpers (fallback)
-    const loadLocal = ()=>{
-      try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw){ const parsed = JSON.parse(raw); state.data = parsed.data || {}; state.date = parsed.date || state.date; } }catch(e){console.error(e);} }
-    const saveLocal = ()=>{ localStorage.setItem(STORAGE_KEY, JSON.stringify({date: state.date, data: state.data})); }
-
-    // Simple API wrapper with fallback
-    async function apiGet(path){ try{ const r = await fetch(API_BASE + path); if(!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }catch(e){ console.warn('API GET failed', path, e); return { _error:true, message:e.message }; } }
-    async function apiPost(path, body){ try{ const r = await fetch(API_BASE + path, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}); if(!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }catch(e){ console.warn('API POST failed', path, e); return { _error:true, message:e.message }; } }
-    async function apiPut(path, body){ try{ const r = await fetch(API_BASE + path, {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}); if(!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }catch(e){ console.warn('API PUT failed', path, e); return { _error:true, message:e.message }; } }
-    async function apiDelete(path){ try{ const r = await fetch(API_BASE + path, {method:'DELETE'}); if(!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }catch(e){ console.warn('API DELETE failed', path, e); return { _error:true, message:e.message }; } }
-
-    // Toast
-    const toast = (msg, danger=false)=>{ const t = $('#toast'); t.textContent = msg || 'Saxlanıldı'; t.style.background = danger ? 'linear-gradient(135deg, #ef4444, #7c3aed)' : ''; t.classList.add('show'); setTimeout(()=> t.classList.remove('show'), 1600); }
-
-    // Ensure day exists in local cache
-    const ensureDayLocal = (d)=>{ const day = state.data[d] || { entries: [], notes: '' }; state.data[d] = day; return day; }
-
-    // ====== Remote-aware operations (try server, fallback to local) ======
-    async function fetchDay(date){
-      // try server first
-      const res = await apiGet(`/day/${date}`);
-      if(!res._error){ state.data[date] = res.day || {entries:[], notes: ''}; return {source:'server', day: state.data[date]}; }
-      // fallback
-      loadLocal(); ensureDayLocal(date); return {source:'local', day: state.data[date]};
+    function formatMoney(n){
+      const v = Number(n) || 0;
+      // Use Azerbaijani locale if available, fallback to 2 decimals
+      try{ return v.toLocaleString('az-AZ',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' AZN'; }catch(e){ return v.toFixed(2) + ' AZN'; }
     }
 
-    async function saveDay(date){
-      const day = ensureDayLocal(date);
-      const res = await apiPost(`/day/${date}`, day);
-      if(!res._error){ toast('Serverə göndərildi'); return {ok:true}; }
-      // fallback save locally
-      saveLocal(); toast('Serverə qoşulmadı — lokal saxlandı'); return {ok:false};
+    function nowDate(){
+      const d = new Date();
+      return d.toISOString().slice(0,10); // YYYY-MM-DD
     }
 
-    async function addEntryRemote(person, amount, note){
-      const payload = { date: state.date, person, amount: Number(amount)||0, note: note||'' };
-      const res = await apiPost('/entry', payload);
-      if(!res._error && res.entry){ // server returned new entry
-        ensureDayLocal(state.date);
-        state.data[state.date].entries.push(res.entry);
-        saveLocal(); render(); toast('Əlavə olundu (server)');
+    function niceDateISO(iso){
+      if(!iso) return '--';
+      const [y,m,d] = iso.split('-');
+      return d + '.' + m + '.' + y;
+    }
+
+    // --- State & storage ---
+    function loadRecords(){
+      const raw = localStorage.getItem(LS_KEY);
+      try{ return raw ? JSON.parse(raw) : []; }catch(e){return []}
+    }
+    function saveRecords(list){
+      localStorage.setItem(LS_KEY, JSON.stringify(list));
+    }
+
+    // --- DOM refs ---
+    const gul = document.getElementById('gulshad');
+    const aid = document.getElementById('aide');
+    const arz = document.getElementById('arzu');
+    const note = document.getElementById('note');
+    const totalValue = document.getElementById('totalValue');
+    const preview = document.getElementById('previewBreakdown');
+    const recordsList = document.getElementById('recordsList');
+    const todayDisplay = document.getElementById('todayDisplay');
+    const clockEl = document.getElementById('clock');
+
+    // form buttons
+    const saveBtn = document.getElementById('saveBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const newDayBtn = document.getElementById('newDayBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+
+    // template
+    const tpl = document.getElementById('recordTemplate');
+
+    // current edit id
+    let editingId = null;
+
+    // --- Logic ---
+    function computeTotal(){
+      const g = parseFloat(gul.value) || 0;
+      const a = parseFloat(aid.value) || 0;
+      const r = parseFloat(arz.value) || 0;
+      const s = g + a + r;
+      totalValue.textContent = formatMoney(s);
+      preview.textContent = `Gülşad ${formatMoney(g)} • Aidə ${formatMoney(a)} • Arzu ${formatMoney(r)}`;
+      return {g,a,r,s};
+    }
+
+    function clearForm(){
+      gul.value = ''; aid.value = ''; arz.value = ''; note.value = '';
+      editingId = null;
+      computeTotal();
+      saveBtn.textContent = 'Saxla';
+      saveBtn.style.background = '';
+    }
+
+    function renderRecords(){
+      const list = loadRecords().sort((a,b)=> b.time - a.time);
+      recordsList.innerHTML = '';
+      if(!list.length){
+        recordsList.innerHTML = '<div class="empty">Qeyd tapılmadı — ilk qeydi yaradın.</div>';
         return;
       }
-      // fallback
-      const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('local-' + Date.now() + '-' + Math.random().toString(36).slice(2,8));
-      const time = new Date().toLocaleTimeString('az-AZ',{hour:'2-digit', minute:'2-digit'});
-      const entry = { id, person, amount: Number(amount)||0, note: note||'', time };
-      ensureDayLocal(state.date).entries.push(entry); saveLocal(); render(); toast('Əlavə edildi (lokal)');
-    }
+      for(const r of list){
+        const node = tpl.content.cloneNode(true);
+        const root = node.querySelector('.record');
+        root.dataset.id = r.id;
+        node.querySelector('.rec-date').textContent = niceDateISO(r.date);
+        node.querySelector('.rec-note').textContent = r.note || '—';
+        node.querySelector('.rec-gul').textContent = formatMoney(r.gul);
+        node.querySelector('.rec-aid').textContent = formatMoney(r.aid);
+        node.querySelector('.rec-arz').textContent = formatMoney(r.arz);
+        node.querySelector('.rec-total').textContent = formatMoney(r.total);
 
-    async function updateEntryRemote(id, patch){
-      const res = await apiPut(`/entry/${encodeURIComponent(id)}`, patch);
-      if(!res._error && res.ok){ // update local copy
-        const day = ensureDayLocal(state.date);
-        const idx = day.entries.findIndex(e=>e.id===id);
-        if(idx>-1){ day.entries[idx] = { ...day.entries[idx], ...patch }; saveLocal(); render(); toast('Yeniləndi (server)'); }
-        return;
+        node.querySelector('.editBtn').addEventListener('click',()=> startEdit(r.id));
+        node.querySelector('.delBtn').addEventListener('click',()=> deleteRecord(r.id));
+
+        recordsList.appendChild(node);
       }
-      // fallback local update
-      const day = ensureDayLocal(state.date);
-      const idx = day.entries.findIndex(e=>e.id===id);
-      if(idx>-1){ day.entries[idx] = { ...day.entries[idx], ...patch }; saveLocal(); render(); toast('Yeniləndi (lokal)'); }
     }
 
-    async function deleteEntryRemote(id){
-      const res = await apiDelete(`/entry/${encodeURIComponent(id)}`);
-      if(!res._error && res.ok){ // remove locally
-        // find across current day's entries
-        const day = ensureDayLocal(state.date);
-        const idx = day.entries.findIndex(e=>e.id===id);
-        if(idx>-1) day.entries.splice(idx,1);
-        saveLocal(); render(); toast('Silindi (server)'); return;
+    function saveCurrent(){
+      const list = loadRecords();
+      const {g,a,r,s} = computeTotal();
+      const rec = {
+        id: editingId || 'id_' + Date.now(),
+        date: nowDate(),
+        time: Date.now(),
+        gul: Number(g.toFixed(2)),
+        aid: Number(a.toFixed(2)),
+        arz: Number(r.toFixed(2)),
+        total: Number(s.toFixed(2)),
+        note: note.value || ''
+      };
+
+      if(editingId){
+        const idx = list.findIndex(x=>x.id===editingId);
+        if(idx>-1) list[idx] = rec;
+      } else {
+        list.push(rec);
       }
-      // fallback local delete
-      const day = ensureDayLocal(state.date);
-      const idx = day.entries.findIndex(e=>e.id===id);
-      if(idx>-1){ day.entries.splice(idx,1); saveLocal(); render(); toast('Silindi (lokal)'); }
+      saveRecords(list);
+      renderRecords();
+      clearForm();
+      flashSaved();
     }
 
-    async function resetDayRemote(date){
-      const res = await apiDelete(`/day/${date}`);
-      if(!res._error && res.ok){ state.data[date] = { entries: [], notes: '' }; saveLocal(); render(); toast('Gün sıfırlandı (server)'); return; }
-      // fallback
-      state.data[date] = { entries: [], notes: '' }; saveLocal(); render(); toast('Gün sıfırlandı (lokal)');
+    function startEdit(id){
+      const list = loadRecords();
+      const r = list.find(x=>x.id===id);
+      if(!r) return alert('Qeyd tapılmadı');
+      editingId = id;
+      gul.value = r.gul; aid.value = r.aid; arz.value = r.arz; note.value = r.note;
+      computeTotal();
+      saveBtn.textContent = 'Düzəlişi Saxla';
+      saveBtn.style.background = 'linear-gradient(180deg,#f59e0b,#d97706)';
+      window.scrollTo({top:0,behavior:'smooth'});
     }
 
-    // ====== Local-only helpers used as fallback ======
-    function addEntryLocal(person, amount, note){
-      const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('local-' + Date.now() + '-' + Math.random().toString(36).slice(2,8));
-      const time = new Date().toLocaleTimeString('az-AZ',{hour:'2-digit', minute:'2-digit'});
-      const entry = { id, person, amount: Number(amount)||0, note: note||'', time };
-      ensureDayLocal(state.date).entries.push(entry); saveLocal(); render(); toast('Əlavə edildi (lokal)');
+    function deleteRecord(id){
+      if(!confirm('Bu qeydi silmək istədiyinizə əminsiniz?')) return;
+      const list = loadRecords().filter(x=>x.id!==id);
+      saveRecords(list);
+      renderRecords();
     }
 
-    function updateEntryLocal(id, patch){ const day = ensureDayLocal(state.date); const idx = day.entries.findIndex(e=>e.id===id); if(idx>-1){ day.entries[idx] = { ...day.entries[idx], ...patch }; saveLocal(); render(); toast('Yeniləndi (lokal)'); } }
-    function deleteEntryLocal(id){ const day = ensureDayLocal(state.date); const idx = day.entries.findIndex(e=>e.id===id); if(idx>-1){ day.entries.splice(idx,1); saveLocal(); render(); toast('Silindi (lokal)'); } }
-
-    // ====== Render logic (same as before) ======
-    function render(){ const day = ensureDayLocal(state.date);
-      $('#dateLabel').textContent = formatDateLabel(fromYMD(state.date)); $('#datePicker').value = state.date;
-      const totals = { 'Gülşad':0, 'Aidə':0, 'Arzu':0 };
-      day.entries.forEach(e=> totals[e.person] = (totals[e.person]||0) + Number(e.amount||0));
-      Object.keys(totals).forEach(p=>{ const el = document.getElementById('total-' + p); if (el){ el.textContent = formatAZN(totals[p]); el.classList.add('pop'); setTimeout(()=> el.classList.remove('pop'), 400) } });
-      const grand = Object.values(totals).reduce((a,b)=>a+b,0); $('#grandTotal').textContent = formatAZN(grand);
-      const tbody = $('#rows'); tbody.innerHTML = '';
-      day.entries.forEach(e=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><span class="chip">${e.person}</span></td>
-          <td><strong>${formatAZN(e.amount)}</strong></td>
-          <td>${e.note ? e.note.replace(/</g,'&lt;').replace(/>/g,'&gt;') : '<span class="muted">—</span>'}</td>
-          <td><span class="muted">${e.time||''}</span></td>
-          <td style="text-align:right">
-            <button class="btn btn-ghost" data-act="edit" data-id="${e.id}">Düzəliş</button>
-            <button class="btn btn-danger" data-act="del" data-id="${e.id}">Sil</button>
-          </td>`;
-        tbody.appendChild(tr);
-      });
-      $('#opsCount').textContent = `${day.entries.length} əməliyyat`;
-      const notesEl = $('#dailyNotes'); const saved = day.notes||''; if(notesEl.value !== saved){ notesEl.value = saved; } $('#saveInd').textContent = saved ? 'Autosave aktivdir ✓' : 'Qeyd yoxdur';
+    function clearAll(){
+      if(!confirm('Bütün qeydləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri alınmaz.')) return;
+      localStorage.removeItem(LS_KEY);
+      renderRecords();
     }
 
-    // ====== Bindings ======
-    function bind(){
-      $$('.card').forEach(card=>{
-        const person = card.dataset.person; const amountInput = $('.amount', card); const noteInput = $('.note', card); const addBtn = $('.addEntry', card);
-        const submit = async ()=>{
-          const val = amountInput.value.trim(); if(val === ''){ amountInput.focus(); amountInput.classList.add('pop'); setTimeout(()=>amountInput.classList.remove('pop'), 300); return; }
-          // try remote add first, else fallback
-          await addEntryRemote(person, parseFloat(val), noteInput.value.trim()); // addEntryRemote already falls back
-          amountInput.value=''; noteInput.value='';
+    // small visual feedback
+    function flashSaved(){
+      saveBtn.classList.add('pulse');
+      setTimeout(()=>saveBtn.classList.remove('pulse'),1200);
+    }
+
+    // Export/Import
+    exportBtn.addEventListener('click',()=>{
+      const data = localStorage.getItem(LS_KEY) || '[]';
+      const blob = new Blob([data],{type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'hesablama_records_' + nowDate() + '.json';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click',()=>{
+      const inp = document.createElement('input'); inp.type='file'; inp.accept='.json,application/json';
+      inp.onchange = e=>{
+        const f = e.target.files[0]; if(!f) return;
+        const r = new FileReader(); r.onload = ev=>{
+          try{ const parsed = JSON.parse(ev.target.result); if(Array.isArray(parsed)){ saveRecords(parsed); renderRecords(); alert('İmport uğurla tamamlandı'); } else alert('Fayl formatı uyğun deyil'); }catch(err){alert('Oxuma xətası: ' + err.message)}
         };
-        addBtn.addEventListener('click', submit);
-        amountInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submit(); });
-        noteInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && e.ctrlKey) submit(); });
-      });
+        r.readAsText(f);
+      };
+      inp.click();
+    });
 
-      // Row actions (edit/delete) - delegated to tbody
-      $('#rows').addEventListener('click', async (e)=>{
-        const btn = e.target.closest('button'); if(!btn) return; const id = btn.dataset.id; const act = btn.dataset.act;
-        if(act==='del'){
-          if(confirm('Silmək istədiyinizə əminsiniz?')){
-            const res = await apiDelete(`/entry/${encodeURIComponent(id)}`);
-            if(!res._error && res.ok){ // server removed
-              deleteEntryLocal(id); toast('Silindi (server)');
-            } else { // fallback delete via remote-aware function
-              await deleteEntryRemote(id);
-            }
-          }
-        } else if(act==='edit'){
-          openEditor(id);
-        }
-      });
+    // form events
+    [gul,aid,arz].forEach(inp=>inp.addEventListener('input',computeTotal));
+    saveBtn.addEventListener('click',saveCurrent);
+    clearBtn.addEventListener('click',clearForm);
+    clearAllBtn.addEventListener('click',clearAll);
 
-      // Notes autosave (debounced)
-      let t; $('#dailyNotes').addEventListener('input', (e)=>{ clearTimeout(t); $('#saveInd').textContent = 'Yazılır…'; const val = e.target.value; t = setTimeout(async ()=>{ ensureDayLocal(state.date).notes = val; const res = await apiPost(`/day/${state.date}`, ensureDayLocal(state.date)); if(!res._error) { saveLocal(); $('#saveInd').textContent='Autosave aktivdir ✓'; toast('Qeyd serverə saxlandı'); } else { saveLocal(); $('#saveInd').textContent='Autosave aktivdir ✓'; toast('Qeyd lokal saxlandı'); } }, 550); });
+    // new day: clears form and scrolls
+    newDayBtn.addEventListener('click',()=>{
+      if(!confirm('Yeni günə keçmək istəyirsiniz? Sahələr sıfırlanacaq, cari qeydi saxlamısınızsa "Saxla" düyməsini basın.')) return;
+      clearForm();
+    });
 
-      // Date controls
-      $('#prevDay').addEventListener('click', ()=>{ shiftDay(-1); });
-      $('#nextDay').addEventListener('click', ()=>{ shiftDay(+1); });
-      $('#todayBtn').addEventListener('click', async ()=>{ state.date = ymd(now()); saveLocal(); await fetchDay(state.date); render(); });
-      $('#datePicker').addEventListener('change', async (e)=>{ state.date = e.target.value || ymd(now()); saveLocal(); await fetchDay(state.date); render(); });
-
-      // Export
-      $('#exportBtn').addEventListener('click', async ()=>{
-        const res = await apiGet('/export');
-        if(!res._error && res.data){ const blob = new Blob([JSON.stringify(res.data,null,2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'kart-melumatlari-server.json'; a.click(); URL.revokeObjectURL(a.href); toast('Serverdən ixrac edildi'); return; }
-        // fallback local
-        const blob = new Blob([JSON.stringify(state.data,null,2)], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'kart-melumatlari-local.json'; a.click(); URL.revokeObjectURL(a.href); toast('Lokal ixrac edildi');
-      });
-
-      // Reset Day
-      $('#resetDayBtn').addEventListener('click', async ()=>{
-        if(confirm('Bu gün üçün bütün qeydlər və əməliyyatlar silinsin?')){
-          const res = await apiDelete(`/day/${state.date}`);
-          if(!res._error && res.ok){ state.data[state.date] = { entries: [], notes: '' }; saveLocal(); render(); toast('Gün sıfırlandı (server)'); }
-          else { state.data[state.date] = { entries: [], notes: '' }; saveLocal(); render(); toast('Gün sıfırlandı (lokal)'); }
-        }
-      });
-
-      // Quick notes -> active card note field
-      $$('button[data-quick]').forEach(b=> b.addEventListener('click', ()=>{ const txt = b.dataset.quick; $$('.card .note').forEach(n=>{ n.value = (n.value? n.value + ' ' : '') + txt; n.classList.add('pop'); setTimeout(()=>n.classList.remove('pop'), 300); }); }));
+    // clock & date
+    function tickClock(){
+      const d = new Date();
+      todayDisplay.textContent = 'Tarix: ' + niceDateISO(nowDate());
+      clockEl.textContent = d.toLocaleTimeString();
     }
+    setInterval(tickClock,1000); tickClock();
 
-    function shiftDay(delta){ const d = fromYMD(state.date); d.setDate(d.getDate()+delta); state.date = ymd(d); saveLocal(); fetchDay(state.date).then(render); }
+    // initial
+    computeTotal(); renderRecords();
 
-    // Row editor (prompts) — uses remote-aware update
-    async function openEditor(id){ const day = ensureDayLocal(state.date); const e = day.entries.find(x=>x.id===id); if(!e) return; const newAmount = prompt('Yeni məbləğ (₼):', e.amount); if(newAmount===null) return; const n = parseFloat(newAmount); if(Number.isNaN(n)){ alert('Düzgün məbləğ daxil edin'); return; } const newNote = prompt('Yeni qeyd:', e.note||''); if(newNote===null) return; // try remote update
-      const res = await apiPut(`/entry/${encodeURIComponent(id)}`, { amount: n, note: newNote }); if(!res._error && res.ok){ // server updated
-        const idx = day.entries.findIndex(x=>x.id===id); if(idx>-1){ day.entries[idx] = { ...day.entries[idx], amount: n, note: newNote }; saveLocal(); render(); toast('Yeniləndi (server)'); }
-      } else { // fallback
-        updateEntryLocal(id, { amount: n, note: newNote }); }
-    }
+    // keyboard quick save (Ctrl+S)
+    window.addEventListener('keydown',e=>{
+      if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
+        e.preventDefault(); saveCurrent();
+      }
+    });
 
-    // Init
-    (async function init(){ loadLocal(); await fetchDay(state.date); bind(); render(); })();
+    // Touch: quick add helper (double-tap save)
+    let lastTap=0; document.body.addEventListener('touchend', ()=>{ const t = Date.now(); if(t-lastTap<300) saveCurrent(); lastTap=t; });
 
-  })();
   </script>
-
-  <!--
-    server.js (Node/Express) nümunəsi — public/ qovluğuna yuxarıdakı index.html qoyun.
-
-    const express = require('express');
-    const fs = require('fs').promises;
-    const path = require('path');
-    const cors = require('cors');
-    const { randomUUID } = require('crypto');
-
-    const DATA_FILE = path.join(__dirname, 'data.json');
-    const PORT = process.env.PORT || 3000;
-    const app = express();
-    app.use(cors());
-    app.use(express.json());
-
-    async function readData(){ try{ const raw = await fs.readFile(DATA_FILE,'utf8'); return JSON.parse(raw || '{}'); }catch(e){ return {}; } }
-    async function writeData(d){ await fs.writeFile(DATA_FILE, JSON.stringify(d,null,2),'utf8'); }
-
-    // Serve frontend
-    app.use(express.static(path.join(__dirname, 'public')));
-
-    app.get('/api/export', async (req,res)=>{ const data = await readData(); res.json({data}); });
-
-    app.get('/api/day/:date', async (req,res)=>{ const date = req.params.date; const data = await readData(); res.json({ day: data[date] || { entries: [], notes: '' } }); });
-
-    app.post('/api/day/:date', async (req,res)=>{ const date = req.params.date; const body = req.body || { entries: [], notes: '' }; const data = await readData(); data[date] = body; await writeData(data); res.json({ ok:true }); });
-
-    app.post('/api/entry', async (req,res)=>{
-      const { date, person, amount, note } = req.body || {};
-      if(!date) return res.status(400).json({ error:'missing date' });
-      const data = await readData(); data[date] = data[date] || { entries: [], notes: '' };
-      const id = (typeof randomUUID === 'function') ? randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2,8));
-      const time = new Date().toLocaleTimeString('az-AZ', { hour:'2-digit', minute:'2-digit' });
-      const entry = { id, person, amount: Number(amount)||0, note: note||'', time };
-      data[date].entries.push(entry);
-      await writeData(data);
-      res.json({ entry });
-    });
-
-    app.put('/api/entry/:id', async (req,res)=>{
-      const id = req.params.id; const patch = req.body || {};
-      const data = await readData(); let found=false;
-      for(const date of Object.keys(data)){
-        const day = data[date]; const idx = (day.entries||[]).findIndex(e=>e.id===id);
-        if(idx>-1){ day.entries[idx] = { ...day.entries[idx], ...patch }; found=true; break; }
-      }
-      if(found){ await writeData(data); return res.json({ ok:true }); }
-      res.status(404).json({ error:'not found' });
-    });
-
-    app.delete('/api/entry/:id', async (req,res)=>{
-      const id = req.params.id; const data = await readData(); let found=false;
-      for(const date of Object.keys(data)){
-        const day = data[date]; const idx = (day.entries||[]).findIndex(e=>e.id===id);
-        if(idx>-1){ day.entries.splice(idx,1); found=true; break; }
-      }
-      if(found){ await writeData(data); return res.json({ ok:true }); }
-      res.status(404).json({ error:'not found' });
-    });
-
-    app.delete('/api/day/:date', async (req,res)=>{ const date = req.params.date; const data = await readData(); data[date] = { entries: [], notes: '' }; await writeData(data); res.json({ ok:true }); });
-
-    app.listen(PORT, ()=> console.log('Server listening on', PORT));
-  -->
-
 </body>
 </html>
